@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace pabdFinal.Forms
@@ -15,29 +14,54 @@ namespace pabdFinal.Forms
         DataTable dt;
         DataRow dr;
         int bttn;
+        Image curImage;
+        string curFileName;
+        string strKoneksi = "Data Source = LAPTOP-E2NL0H6I\\MIFTAHUL_HUDA; " +
+            "Initial Catalog = penjualanPadiBeras; " +
+            "Integrated Security = True; MultipleActiveResultSets=true";
 
         public Transaksi()
         {
             InitializeComponent();
+            this.jumlahkg.LostFocus += new System.EventHandler(this.jumlahkg_LostFocus);
         }
 
         private void Transaksi_Load(object sender, EventArgs e)
         {
-            // TODO: This line of code loads data into the 'penjualanPadiBerasDataSet.Transaksi' table. You can move, or remove it, as needed.
-            this.transaksiTableAdapter.Fill(this.penjualanPadiBerasDataSet.Transaksi);
-            // TODO: This line of code loads data into the 'penjualanPadiBerasDataSet.Suplier_Distributor' table. You can move, or remove it, as needed.
-            this.suplier_DistributorTableAdapter.Fill(this.penjualanPadiBerasDataSet.Suplier_Distributor);
-            // TODO: This line of code loads data into the 'penjualanPadiBerasDataSet.Padi_Beras' table. You can move, or remove it, as needed.
-            this.padi_BerasTableAdapter.Fill(this.penjualanPadiBerasDataSet.Padi_Beras);
+            IDtr.TextChanged += new EventHandler(IDtr_TextChanged);
 
-            IDtr.Enabled = false;
+            IDtr.Enabled = true;
             jumlahkg.Enabled = false;
             totaltr.Enabled = false;
             idpb.Enabled = false;
             idsd.Enabled = false;
+            invcpath.Enabled = false;
 
+            Uploadbttn.Enabled = false;
             button_save.Enabled = false;
             button_cancel.Enabled = false;
+
+            SqlConnection connection = new SqlConnection(strKoneksi);
+            connection.Open();
+            string query = "SELECT * FROM Suplier_Distributor";
+            SqlCommand cmd = new SqlCommand(query, connection);
+            cmd.CommandType = CommandType.Text;
+            SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+            DataTable dataTable = new DataTable();
+            adapter.Fill(dataTable);
+
+            dataGridView1.DataSource = dataTable;
+
+            string query1 = "SELECT * FROM Padi_Beras";
+            SqlCommand cmd1 = new SqlCommand(query1, connection);
+            cmd1.CommandType = CommandType.Text;
+            SqlDataAdapter adapter1 = new SqlDataAdapter(cmd1);
+            DataTable dataTable1 = new DataTable();
+            adapter1.Fill(dataTable1);
+
+            dataGridView2.DataSource = dataTable1;
+
+            connection.Close();
         }
 
         private void button_edit_Click(object sender, EventArgs e)
@@ -55,6 +79,7 @@ namespace pabdFinal.Forms
             button_delete.Enabled = false;
             button_edit.Enabled = false;
             button_cancel.Enabled = true;
+            Uploadbttn.Enabled = true;
         }
 
         private void button_add_Click(object sender, EventArgs e)
@@ -82,65 +107,98 @@ namespace pabdFinal.Forms
             button_delete.Enabled = false;
             button_edit.Enabled = false;
             button_cancel.Enabled = true;
+            Uploadbttn.Enabled = true;
         }
 
         private void button_save_Click(object sender, EventArgs e)
         {
-            dt = penjualanPadiBerasDataSet.Tables["Transaksi"];
             if (bttn == 1)
             {
-                // Menyimpan data kedalam database
-                dr = dt.NewRow();
+                using (SqlConnection connection = new SqlConnection(strKoneksi))
+                {
+                    connection.Open();
 
-                // Ensure these values are correctly parsed to their respective types
-                if (int.TryParse(jumlahkg.Text, out int jumlahBerat) &&
-                    decimal.TryParse(GetHarga(idpb.Text), out decimal harga))
-                {
-                    decimal totalTransaksi = jumlahBerat * harga;
-                    dr["Jumlah_Berat"] = jumlahBerat;
-                    dr["Total_Transaksi"] = totalTransaksi;
-                    dr["ID_p_b"] = idpb.Text;
-                    dr["ID_s_d"] = idsd.Text;
-                    dt.Rows.Add(dr);
-                }
-                else
-                {
-                    MessageBox.Show("Jumlah Berat harus berupa angka dan ID p_b harus valid.");
-                    return;
+                    if (int.TryParse(jumlahkg.Text, out int jumlahBerat) &&
+                        decimal.TryParse(GetHarga(idpb.Text), out decimal harga))
+                    {
+                        string bKT = invcpath.Text;
+                        string exd = Path.GetExtension(bKT);
+                        string pth = @"D:\_pabd\invoice\";
+                        string BBayar = pth + IDtr.Text + "_BuktiBayar_" + exd;
+                        decimal totalTransaksi = jumlahBerat * harga;
+
+                        string query = "INSERT INTO Transaksi (Jumlah_Berat, Total_Transaksi, ID_p_b, ID_s_d, Invoice) " +
+                                       "VALUES (@JumlahBerat, @TotalTransaksi, @IDpb, @IDsid, @Invoice)";
+
+                        using (SqlCommand cmd = new SqlCommand(query, connection))
+                        {
+                            cmd.Parameters.AddWithValue("@JumlahBerat", jumlahBerat);
+                            cmd.Parameters.AddWithValue("@TotalTransaksi", totalTransaksi);
+                            cmd.Parameters.AddWithValue("@IDpb", idpb.Text);
+                            cmd.Parameters.AddWithValue("@IDsid", idsd.Text);
+                            cmd.Parameters.AddWithValue("@Invoice", BBayar);
+
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Jumlah Berat harus berupa angka dan ID p_b harus valid.");
+                        return;
+                    }
                 }
             }
-            else
+            else if (bttn == 2)
             {
-                // mencari primary key yang akan diubah datanya
-                dr = dt.Rows.Find(IDtr.Text);
-
-                // Mengubah data Kedalam database
-                if (int.TryParse(jumlahkg.Text, out int jumlahBerat) &&
-                    decimal.TryParse(GetHarga(idpb.Text), out decimal harga))
+                if (dr != null)
                 {
-                    decimal totalTransaksi = jumlahBerat * harga;
-                    dr.BeginEdit();
-                    dr["Jumlah_Berat"] = jumlahBerat;
-                    dr["Total_Transaksi"] = totalTransaksi;
-                    dr["ID_p_b"] = idpb.Text;
-                    dr["ID_s_d"] = idsd.Text;
-                    dr.EndEdit();
+                    using (SqlConnection connection = new SqlConnection(strKoneksi))
+                    {
+                        connection.Open();
+
+                        if (int.TryParse(jumlahkg.Text, out int jumlahBerat) &&
+                            decimal.TryParse(GetHarga(idpb.Text), out decimal harga))
+                        {
+                            string bKT = invcpath.Text;
+                            string exd = Path.GetExtension(bKT);
+                            string pth = @"D:\_pabd\invoice\";
+                            string BBayar = pth + IDtr.Text + "_BuktiBayar_" + exd;
+                            decimal totalTransaksi = jumlahBerat * harga;
+
+                            string query = "INSERT INTO Transaksi (Jumlah_Berat, Total_Transaksi, ID_p_b, ID_s_d, Invoice) " +
+                                           "VALUES (@JumlahBerat, @TotalTransaksi, @IDpb, @IDsid, @Invoice)";
+
+                            using (SqlCommand cmd = new SqlCommand(query, connection))
+                            {
+                                cmd.Parameters.AddWithValue("@JumlahBerat", jumlahBerat);
+                                cmd.Parameters.AddWithValue("@TotalTransaksi", totalTransaksi);
+                                cmd.Parameters.AddWithValue("@IDpb", idpb.Text);
+                                cmd.Parameters.AddWithValue("@IDsid", idsd.Text);
+                                cmd.Parameters.AddWithValue("@Invoice", BBayar);
+
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Jumlah Berat harus berupa angka dan ID p_b harus valid.");
+                            return;
+                        }
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("Jumlah Berat harus berupa angka dan ID p_b harus valid.");
+                    MessageBox.Show("Data dengan ID Transaksi tersebut tidak ditemukan.");
                     return;
                 }
             }
 
-            transaksiTableAdapter.Update(penjualanPadiBerasDataSet);
             IDtr.Enabled = false;
             jumlahkg.Enabled = false;
             totaltr.Enabled = false;
             idpb.Enabled = false;
             idsd.Enabled = false;
 
-            this.transaksiTableAdapter.Fill(this.penjualanPadiBerasDataSet.Transaksi);
             button_add.Enabled = true;
             button_edit.Enabled = true;
             button_delete.Enabled = true;
@@ -177,10 +235,10 @@ namespace pabdFinal.Forms
             string code;
             code = IDtr.Text;
             // mencari data yang akan dihapus berdasarkan primarykey
-            dr = penjualanPadiBerasDataSet.Tables["Transaksi"].Rows.Find(code);
+            dr = penjualanPadiBerasDataSet3.Tables["Transaksi"].Rows.Find(code);
             // Menghapus Data
             dr.Delete();
-            transaksiTableAdapter.Update(penjualanPadiBerasDataSet);
+            transaksiTableAdapter1.Update(penjualanPadiBerasDataSet3);
         }
 
         private void button_cancel_Click(object sender, EventArgs e)
@@ -191,12 +249,46 @@ namespace pabdFinal.Forms
             idpb.Enabled = false;
             idsd.Enabled = false;
 
-            this.transaksiTableAdapter.Fill(this.penjualanPadiBerasDataSet.Transaksi);
+            this.transaksiTableAdapter1.Fill(this.penjualanPadiBerasDataSet3.Transaksi);
             button_add.Enabled = true;
             button_edit.Enabled = true;
             button_delete.Enabled = true;
             button_save.Enabled = false;
             button_cancel.Enabled = false;
+        }
+
+        //validasi
+        private void jumlahkg_LostFocus(object sender, EventArgs e)
+        {
+            int jumlahBerat;
+            if (!int.TryParse(jumlahkg.Text, out jumlahBerat))
+            {
+                MessageBox.Show(this, "Jumlah berat harus berupa angka atau tidak boleh kosong.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                jumlahkg.Focus(); // Fokus kembali ke barang_jumlahbrt untuk pengisian ulang
+            }
+        }
+
+        private void IDtr_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Uploadbttn_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            DialogResult dlgRes = dlg.ShowDialog();
+            if (dlgRes != DialogResult.Cancel)
+            {
+                if (invcpath.Text == null)
+                {
+                    invcpath.Text = dlg.FileName;
+                }
+                else
+                {
+                    invcpath.Clear();
+                    invcpath.Text = dlg.FileName;
+                }
+            }
         }
     }
 }

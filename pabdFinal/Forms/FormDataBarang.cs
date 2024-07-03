@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -20,16 +21,13 @@ namespace pabdFinal.Forms
         public FormDataBarang()
         {
             InitializeComponent();
+            this.barang_jumlahbrt.LostFocus += new System.EventHandler(this.barang_jumlahbrt_LostFocus);
         }
 
         private void FormDataBarang_Load(object sender, EventArgs e)
         {
-            // TODO: This line of code loads data into the 'penjualanPadiBerasDataSet.Padi_Beras' table. You can move, or remove it, as needed.
-            this.padi_BerasTableAdapter.Fill(this.penjualanPadiBerasDataSet.Padi_Beras);
-            // TODO: This line of code loads data into the 'penjualanPadiBerasDataSet.Data_Barang' table. You can move, or remove it, as needed.
-            this.data_BarangTableAdapter.Fill(this.penjualanPadiBerasDataSet.Data_Barang);
 
-            barang_id_log.Enabled = false;
+            barang_id_log.Enabled = true;
             barang_id_pb.Enabled = false;
             barang_jumlahbrt.Enabled = false;
             dateTimePicker1.Enabled = false;
@@ -45,7 +43,7 @@ namespace pabdFinal.Forms
             bttn = 2;
 
             button_save.Enabled = true;
-                    barang_id_log.Enabled = false;
+            barang_id_log.Enabled = false;
             barang_id_pb.Enabled = true;
             barang_jumlahbrt.Enabled = true;
             dateTimePicker1.Enabled = true;
@@ -70,12 +68,12 @@ namespace pabdFinal.Forms
             barang_id_pb.Enabled = true;
             barang_jumlahbrt.Enabled = true;
             dateTimePicker1.Enabled = true;
-            barang_id_admin.Enabled = true;
+            barang_id_admin.Enabled = false;
 
             barang_id_log.Text = "";
             barang_id_pb.Text = "";
             barang_jumlahbrt.Text = "";
-            barang_id_admin.Text = "";
+            barang_id_admin.Text = "ADM49";
 
             button_add.Enabled = false;
             button_delete.Enabled = false;
@@ -165,6 +163,52 @@ namespace pabdFinal.Forms
             button_delete.Enabled = true;
             button_save.Enabled = false;
             button_cancel.Enabled = false;
+        }
+
+        private void barang_id_log_TextChanged(object sender, EventArgs e)
+        {
+            if (int.TryParse(barang_id_log.Text, out int logID))
+            {
+                DataRow[] rows = penjualanPadiBerasDataSet.Data_Barang.Select($"ID_log = {logID}");
+
+                if (rows.Length > 0)
+                {
+                    DataRow row = rows[0];
+
+                    // Set nilai kontrol-kontrol lainnya sesuai dengan data yang ditemukan
+                    barang_id_pb.Text = row["ID_p_b"].ToString();
+                    barang_jumlahbrt.Text = row["Jumlah_Berat"].ToString();
+                    dateTimePicker1.Value = (DateTime)row["Tanggal"];
+                    barang_id_admin.Text = row["ID_Admin"].ToString();
+                }
+                else
+                {
+                    // Bersihkan nilai kontrol-kontrol lainnya jika data tidak ditemukan
+                    barang_id_pb.Text = "";
+                    barang_jumlahbrt.Text = "";
+                    dateTimePicker1.Value = DateTime.Today;
+                    barang_id_admin.Text = "";
+                }
+            }
+            else
+            {
+                // Reset nilai kontrol jika input tidak valid
+                barang_id_pb.Text = "";
+                barang_jumlahbrt.Text = "";
+                dateTimePicker1.Value = DateTime.Today;
+                barang_id_admin.Text = "";
+            }
+        }
+
+        //validsi
+        private void barang_jumlahbrt_LostFocus(object sender, EventArgs e)
+        {
+            int jumlahBerat;
+            if (!int.TryParse(barang_jumlahbrt.Text, out jumlahBerat))
+            {
+                MessageBox.Show(this, "Jumlah berat harus berupa angka.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                barang_jumlahbrt.Focus(); // Fokus kembali ke barang_jumlahbrt untuk pengisian ulang
+            }
         }
     }
 }

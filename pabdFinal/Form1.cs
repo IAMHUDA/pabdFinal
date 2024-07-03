@@ -104,5 +104,15 @@ namespace pabdFinal
         {
             OpenChildForm(new Forms.Transaksi(), sender);
         }
+
+        private void panelDesktopPane_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void bttnHome_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new Forms.home(), sender);
+        }
     }
 }

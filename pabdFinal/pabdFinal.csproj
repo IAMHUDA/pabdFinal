@@ -33,8 +33,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ExcelDataReader, Version=3.7.0.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelDataReader.3.7.0\lib\net462\ExcelDataReader.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelDataReader.DataSet, Version=3.7.0.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelDataReader.DataSet.3.7.0\lib\net462\ExcelDataReader.DataSet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -57,6 +65,12 @@
     </Compile>
     <Compile Include="Forms\FormDataBarang.Designer.cs">
       <DependentUpon>FormDataBarang.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\home.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\home.Designer.cs">
+      <DependentUpon>home.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\PadiBeras.cs">
       <SubType>Form</SubType>
@@ -81,6 +95,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>penjualanPadiBerasDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="penjualanPadiBerasDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>penjualanPadiBerasDataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="penjualanPadiBerasDataSet2.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>penjualanPadiBerasDataSet2.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="penjualanPadiBerasDataSet3.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>penjualanPadiBerasDataSet3.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThemeColor.cs" />
@@ -89,6 +118,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormDataBarang.resx">
       <DependentUpon>FormDataBarang.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\home.resx">
+      <DependentUpon>home.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\PadiBeras.resx">
       <DependentUpon>PadiBeras.cs</DependentUpon>
@@ -108,6 +140,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="packages.config" />
     <None Include="penjualanPadiBerasDataSet.xsc">
       <DependentUpon>penjualanPadiBerasDataSet.xsd</DependentUpon>
     </None>
@@ -118,6 +151,39 @@
     </None>
     <None Include="penjualanPadiBerasDataSet.xss">
       <DependentUpon>penjualanPadiBerasDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="penjualanPadiBerasDataSet1.xsc">
+      <DependentUpon>penjualanPadiBerasDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="penjualanPadiBerasDataSet1.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>penjualanPadiBerasDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="penjualanPadiBerasDataSet1.xss">
+      <DependentUpon>penjualanPadiBerasDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="penjualanPadiBerasDataSet2.xsc">
+      <DependentUpon>penjualanPadiBerasDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="penjualanPadiBerasDataSet2.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>penjualanPadiBerasDataSet2.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="penjualanPadiBerasDataSet2.xss">
+      <DependentUpon>penjualanPadiBerasDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="penjualanPadiBerasDataSet3.xsc">
+      <DependentUpon>penjualanPadiBerasDataSet3.xsd</DependentUpon>
+    </None>
+    <None Include="penjualanPadiBerasDataSet3.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>penjualanPadiBerasDataSet3.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="penjualanPadiBerasDataSet3.xss">
+      <DependentUpon>penjualanPadiBerasDataSet3.xsd</DependentUpon>
     </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
